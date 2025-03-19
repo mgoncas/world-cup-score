@@ -4,17 +4,21 @@ import org.worldcup.model.Bet;
 import org.worldcup.model.BetStatus;
 import org.worldcup.service.BetProcessor;
 
+import java.util.Random;
+
 public class Main {
     public static void main(String[] args) {
         BetProcessor processor = new BetProcessor(4); // 4 workers
+        Random random = new Random();
+        BetStatus[] values = BetStatus.values();
 
-        // Inicialización de 100 apuestas de ejemplo
-        for (int i = 1; i <= 100; i++) {
+        // Inicialización de 50 apuestas con estado OPEN
+        for (int i = 1; i <= 50; i++) {
             // Primera actualización de la apuesta, debe ser OPEN
             Bet bet = new Bet.BetBuilder()
                     .id(i)
-                    .amount(100.0)
-                    .odds(1.5)
+                    .amount(random.nextDouble(100.0))
+                    .odds(random.nextDouble(5.0))
                     .client("Cliente" + i)
                     .event("Evento")
                     .market("Market1")
@@ -22,33 +26,22 @@ public class Main {
                     .status(BetStatus.OPEN)
                     .build();
             processor.addBet(bet);
+        }
 
-            BetStatus finalStatus;
-            if (i % 3 == 0) {
-                finalStatus = BetStatus.WINNER;
-            } else if (i % 3 == 1) {
-                finalStatus = BetStatus.LOSER;
-            } else {
-                finalStatus = BetStatus.VOID;
-            }
-            new Thread(() -> {
-                try {
-                    Thread.sleep(100); // Simula retardo antes de actualizar a estado final
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                }
-                Bet finalBet = new Bet.BetBuilder()
-                        .id(bet.getId())
-                        .amount(bet.getAmount())
-                        .odds(bet.getOdds())
-                        .client(bet.getClient())
-                        .event(bet.getEvent())
-                        .market(bet.getMarket())
-                        .selection(bet.getSelection())
-                        .status(finalStatus)
-                        .build();
-                processor.addBet(finalBet);
-            }).start();
+        // Inicialización de 50 apuestas con estado ALEATORIO
+        for (int i = 1; i <= 50; i++) {
+            // Primera actualización de la apuesta, debe ser OPEN
+            Bet bet = new Bet.BetBuilder()
+                    .id(i)
+                    .amount(random.nextDouble(100.0))
+                    .odds(random.nextDouble(5.0))
+                    .client("Cliente" + i)
+                    .event("Evento")
+                    .market("Market1")
+                    .selection("Selection1")
+                    .status(BetStatus.values()[random.nextInt(4)])
+                    .build();
+            processor.addBet(bet);
         }
 
         try {
