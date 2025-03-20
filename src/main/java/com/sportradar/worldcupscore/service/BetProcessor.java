@@ -3,8 +3,10 @@ package com.sportradar.worldcupscore.service;
 
 import com.sportradar.worldcupscore.model.Bet;
 import com.sportradar.worldcupscore.model.BetStatus;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,9 +21,12 @@ public class BetProcessor {
 
     private static final Logger logger = LoggerFactory.getLogger(BetProcessor.class);
 
+    @Value("${bet.processor.workers:4}")
+    private int numberOfWorkers;
+
     private final BlockingQueue<Bet> betQueue = new LinkedBlockingQueue<>();
 
-    private final ExecutorService executor;
+    private ExecutorService executor;
     private volatile boolean isShutdown = false;
 
     private final ConcurrentHashMap<Integer, BetStatus> betStatusMap = new ConcurrentHashMap<>();
@@ -35,9 +40,11 @@ public class BetProcessor {
 
     private final List<Bet> reviewBets = Collections.synchronizedList(new ArrayList<>());
 
-    public BetProcessor() {
-        executor = Executors.newFixedThreadPool(4);
-        for (int i = 0; i < 4; i++) {
+
+    @PostConstruct
+    public void initialize() {
+        executor = Executors.newFixedThreadPool(numberOfWorkers);
+        for (int i = 0; i < numberOfWorkers; i++) {
             executor.submit(this::processBets);
         }
     }

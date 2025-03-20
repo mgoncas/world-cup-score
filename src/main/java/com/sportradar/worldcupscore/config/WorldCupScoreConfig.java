@@ -22,7 +22,6 @@ public class WorldCupScoreConfig {
 
     @PostConstruct
     public void initData() {
-        // Inicializa 100 apuestas con estado OPEN
         for (int i = 1; i <= 100; i++) {
             Bet bet = new Bet.BetBuilder()
                     .id(i)
