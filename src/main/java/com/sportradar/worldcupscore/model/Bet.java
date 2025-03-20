@@ -1,5 +1,8 @@
-package org.worldcup.model;
+package com.sportradar.worldcupscore.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+
+@JsonDeserialize(builder = Bet.BetBuilder.class)
 public class Bet {
 
     private final int id;
