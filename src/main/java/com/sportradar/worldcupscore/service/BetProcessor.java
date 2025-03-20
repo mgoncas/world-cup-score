@@ -97,6 +97,7 @@ public class BetProcessor {
             totalProfitLoss.add(result);
             lossPerClient.computeIfAbsent(bet.getClient(), k -> new DoubleAdder()).add(bet.getAmount());
         }
+        logger.info("Bet with id {} has been processed successfully.", bet.getId());
     }
 
     private static boolean isValidBet(Bet bet, BetStatus previousStatus, boolean valid) {
@@ -151,6 +152,10 @@ public class BetProcessor {
             sb.append("Bets flagged for review: ").append(reviewBets.size()).append("\n");
         }
         return sb.toString();
+    }
+
+    public List<Bet> getReviewBets() {
+        return reviewBets;
     }
 
 }

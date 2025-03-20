@@ -1,6 +1,7 @@
 package com.sportradar.worldcupscore.model;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
 @JsonDeserialize(builder = Bet.BetBuilder.class)
 public class Bet {
@@ -57,6 +58,7 @@ public class Bet {
         return status;
     }
 
+    @JsonPOJOBuilder(withPrefix = "")
     public static class BetBuilder {
         private int id;
         private double amount;

@@ -15,20 +15,17 @@ public class BetController {
         this.betProcessor = betProcessor;
     }
 
-    // Endpoint para agregar una apuesta
     @PostMapping("/bets")
     public String addBet(@RequestBody Bet bet) {
         betProcessor.addBet(bet);
         return "Bet added successfully.";
     }
 
-    // Endpoint para obtener el resumen de las apuestas procesadas
     @GetMapping("/summary")
     public String getSummary() {
         return betProcessor.getSummary();
     }
 
-    // Endpoint para apagar el sistema de forma controlada
     @PostMapping("/shutdown")
     public String shutdownSystem() {
         betProcessor.shutdownSystem();
