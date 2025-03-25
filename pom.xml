@@ -88,6 +88,37 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.pitest</groupId>
+				<artifactId>pitest-maven</artifactId>
+				<version>1.7.4</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.pitest</groupId>
+						<artifactId>pitest-junit5-plugin</artifactId>
+						<version>0.15</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>pitest</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>mutationCoverage</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<targetClasses>
+						<param>com.sportradar.worldcupscore.*</param>
+					</targetClasses>
+					<excludedTestClasses>
+						<!-- Ejemplo: se excluye la clase de test 'IntegrationTest' -->
+						<param>com.sportradar.worldcupscore.integration.BetControllerIntegrationTest</param>
+					</excludedTestClasses>
+					<verbose>true</verbose>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
