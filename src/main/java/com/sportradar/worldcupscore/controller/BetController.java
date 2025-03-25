@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api")
 public class BetController {
@@ -28,9 +30,17 @@ public class BetController {
         return ResponseEntity.ok(betProcessor.getSummary());
     }
 
+    @GetMapping("/bets/review")
+    public ResponseEntity<List<Bet>> getReviewBets() {
+        List<Bet> reviewBets = betProcessor.getReviewBets();
+        return ResponseEntity.ok(reviewBets);
+    }
+
     @PostMapping("/shutdown")
     public ResponseEntity<String> shutdownSystem() {
         betProcessor.shutdownSystem();
         return ResponseEntity.ok("System shutdown initiated.");
     }
+
+
 }

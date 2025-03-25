@@ -155,7 +155,9 @@ public class BetProcessor {
     }
 
     public List<Bet> getReviewBets() {
-        return reviewBets;
+        synchronized (reviewBets) {
+            return new ArrayList<>(reviewBets);
+        }
     }
 
 }
