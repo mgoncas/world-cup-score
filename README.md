@@ -82,10 +82,7 @@ The project includes a comprehensive test suite to ensure code quality and syste
 
 ### ✅ Unit Tests
 
-- Validate isolated behavior of individual components such as:
-    - Service layer logic
-    - Utility methods
-    - Edge case handling
+- Validate isolated behavior of individual components.
 
 - Rely on **JUnit 5** and **Mockito** to simulate dependencies.
 
