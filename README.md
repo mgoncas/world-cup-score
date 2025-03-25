@@ -1,152 +1,157 @@
 # World Cup Score API
 
-Este proyecto es un microservicio REST desarrollado en Java con Spring Boot que simula el procesamiento concurrente de apuestas en eventos deportivos. Forma parte de una prueba técnica orientada a evaluar habilidades en diseño de sistemas concurrentes, arquitectura de microservicios y buenas prácticas de desarrollo en entornos reales.
+This project is a REST microservice developed in Java with Spring Boot that simulates concurrent processing of sports event betting. It is part of a technical test aimed at evaluating skills in concurrent system design, microservice architecture, and best development practices in real-world environments.
 
 ---
 
-## 1. Tecnología usada, arquitectura y solución técnica
+## 1. Technology Used, Architecture, and Technical Solution
 
-### Tecnologías principales:
+### Main Technologies:
 - **Java 17**
 - **Spring Boot 3**
-- **Spring Web** (para la construcción de la API REST)
-- **Spring Actuator** (para observabilidad)
-- **Springdoc OpenAPI/Swagger UI** (documentación de endpoints)
-- **JUnit 5** y **Mockito** (para testing)
-- **Jacoco** (para cobertura de código)
-- **PITEST** (para análisis de comportamientos de test en mutaciones)
-- **Maven** (gestión del proyecto y dependencias)
+- **Spring Web** (for building REST API)
+- **Spring Actuator** (for observability)
+- **Springdoc OpenAPI/Swagger UI** (endpoint documentation)
+- **JUnit 5** and **Mockito** (for testing)
+- **Jacoco** (for code coverage)
+- **PITEST** (for mutation testing analysis)
+- **Maven** (project and dependency management)
 
-### Arquitectura:
-- Arquitectura basada en los siguientes paquetes:
-    - `controller`: expone los endpoints de la API.
-    - `service`: contiene la lógica de negocio y procesamiento concurrente.
-    - `model`: contiene las entidades y enums necesarios.
-    - `config`: inicialización, configuración de beans, dataset inicial, etc.
-    - `exception`: control de errores centralizado.
+### Architecture:
+- Architecture based on the following packages:
+    - `controller`: exposes API endpoints.
+    - `service`: contains business logic and concurrent processing.
+    - `model`: contains necessary entities and enums.
+    - `config`: initialization, bean configuration, initial dataset, etc.
+    - `exception`: centralized error handling.
 
-### Solución de concurrencia:
-- El procesamiento de apuestas se realiza mediante **un pool de workers** gestionado con múltiples hilos (`ExecutorService`).
-- Se utiliza una **cola concurrente** (`BlockingQueue`) para garantizar el orden de llegada.
-- Se emplean estructuras como `DoubleAdder` y `Collections.synchronizedList()` para el manejo eficiente y seguro de métricas agregadas.
+### Concurrency Solution:
+- Bet processing is performed using a **worker pool** managed with multiple threads (`ExecutorService`).
+- A **concurrent queue** (`BlockingQueue`) is used to guarantee order of arrival.
+- Structures like `DoubleAdder` and `Collections.synchronizedList()` are employed for efficient and safe aggregate metrics management.
 
-### Control de excepciones:
-- Las excepciones se gestionan globalmente mediante una clase anotada con `@RestControllerAdvice`, que captura errores y devuelve respuestas consistentes (`ResponseEntity<ErrorDetails>`).
+### Exception Handling:
+- Exceptions are globally managed through a class annotated with `@RestControllerAdvice`, which captures errors and returns consistent responses (`ResponseEntity<ErrorDetails>`).
 
-### Configuración
-El proyecto cuenta con una clase de configuración responsable de preparar el sistema al iniciar y al finalizar la ejecución de la aplicación:
+### Configuration
+The project includes a configuration class responsible for preparing the system when starting and ending application execution:
 
-- **Inicialización con `@PostConstruct`:**  
-  Al arrancar la aplicación, se generan automáticamente **100 apuestas en estado `OPEN`** que se inyectan en el sistema. Esto permite tener una base de datos inicial simulada y validar que el procesamiento de apuestas funciona correctamente desde el principio.
+- **Initialization with `@PostConstruct`:**  
+  Upon application startup, **100 bets in `OPEN` state** are automatically generated and injected into the system. This allows having a simulated initial database and validates that bet processing works correctly from the beginning.
 
-- **Apagado con `@PreDestroy`:**  
-  Antes de que la aplicación se detenga, se invoca automáticamente el método `shutdownSystem()` del `BetProcessor`. Este mecanismo asegura un **apagado ordenado**, esperando a que los hilos (workers) finalicen el procesamiento de todas las apuestas pendientes antes de cerrar la aplicación.
+- **Shutdown with `@PreDestroy`:**  
+  Before the application stops, the `shutdownSystem()` method of `BetProcessor` is automatically invoked. This mechanism ensures an **orderly shutdown**, waiting for threads (workers) to finish processing all pending bets before closing the application.
 
-- **Parámetro configurable para el número de workers:**  
-  En el archivo `application.properties` se define el parámetro:
+- **Configurable parameter for number of workers:**  
+  In the `application.properties` file, the following parameter is defined:
 
   ```properties
   bet.processor.workers=5
+  ```
 
 ---
 
-## 2. Endpoints expuestos
+## 2. Exposed Endpoints
 
-| Método | Ruta                     | Descripción                                                                 |
-|--------|--------------------------|-----------------------------------------------------------------------------|
-| POST   | `/api/bets`              | Simula la llegada de una nueva apuesta o actualización de una existente.   |
-| POST   | `/api/shutdown`          | Inicia el apagado ordenado del sistema, asegurando que se procese todo.    |
-| GET    | `/api/summary`           | Devuelve un resumen global de estadísticas de apuestas procesadas.         |
-| GET    | `/api/bets/review`       | Devuelve la lista de apuestas que fueron marcadas para revisión.           |
+| Method | Path                    | Description                                                                 |
+|--------|------------------------|-----------------------------------------------------------------------------|
+| POST   | `/api/bets`            | Simulates the arrival of a new bet or update of an existing one.           |
+| POST   | `/api/shutdown`        | Initiates orderly system shutdown, ensuring everything is processed.        |
+| GET    | `/api/summary`         | Returns a global summary of processed bet statistics.                       |
+| GET    | `/api/bets/review`     | Returns the list of bets marked for review.                                |
 
 ---
 
-## 3. Documentación Swagger
+## 3. Swagger Documentation
 
-El proyecto expone la documentación de la API mediante **Swagger UI** gracias a la integración con `springdoc-openapi`.
+The project exposes API documentation through **Swagger UI** thanks to integration with `springdoc-openapi`.
 
-### Acceso a la interfaz:
+### Access to the interface:
 http://localhost:8080/swagger-ui/index.html
 
-## 4. Pruebas y cobertura
+## 4. Testing and Coverage
 
-El proyecto cuenta con una batería completa de pruebas para asegurar la calidad del código y la fiabilidad del sistema:
+The project includes a comprehensive test suite to ensure code quality and system reliability:
 
-### ✅ Pruebas unitarias
+### ✅ Unit Tests
 
-- Validan el comportamiento aislado de componentes individuales como:
+- Validate isolated behavior of individual components such as:
+    - Service layer logic
+    - Utility methods
+    - Edge case handling
 
+- Rely on **JUnit 5** and **Mockito** to simulate dependencies.
 
-- Se apoyan en **JUnit 5** y **Mockito** para simular dependencias.
+### 🔄 Integration Tests
 
-### 🔄 Pruebas de integración
+- Verify real API REST usage flows using **MockMvc**.
+- Test complete request-response cycles
+- Validate endpoint behaviors under different scenarios
 
-- Verifican flujos reales de uso de la API REST utilizando **MockMvc**.
+### 📊 Code Coverage with Jacoco
 
+**Jacoco** is included to generate a coverage report showing which parts of the code have been executed during tests.
 
-### 📊 Cobertura de código con Jacoco
-
-Se incluye **Jacoco** para generar un informe de cobertura que muestra qué partes del código han sido ejecutadas durante las pruebas.
-
-#### Ejecución:
+#### Execution:
 
 ```bash
 mvn clean test
 ```
 
-#### Resultado:
+#### Result:
 
-El informe HTML estará disponible en:
+The HTML report will be available at:
 ```bash
 target/site/jacoco/index.html
 ```
 
-## 5. Pruebas de mutación con PITEST
+## 5. Mutation Testing with PITEST
 
-El proyecto incorpora **[PITEST](https://pitest.org/)**, una herramienta de análisis de mutaciones que evalúa la calidad de las pruebas automatizadas.
+The project incorporates **[PITEST](https://pitest.org/)**, a mutation analysis tool that evaluates the quality of automated tests.
 
-### 🧬 ¿Qué es una prueba de mutación?
+### 🧬 What is Mutation Testing?
 
-PITEST modifica (mutando) partes del código fuente de forma controlada (por ejemplo, cambiar `>` por `<`, `true` por `false`, etc.) y luego ejecuta los tests.
+PITEST modifies (mutating) parts of the source code in a controlled manner (for example, changing `>` to `<`, `true` to `false`, etc.) and then runs the tests.
 
-- Si los tests **fallan**, significa que han detectado el error → ✅ Test efectivo.
-- Si los tests **pasan**, significa que no están validando bien esa lógica → ⚠️ Posible debilidad en los tests.
+- If tests **fail**, it means they detected the error → ✅ Effective Test.
+- If tests **pass**, it means they are not validating that logic well → ⚠️ Possible test weakness.
 
-### 🚀 Ejecución
+### 🚀 Execution
 
-Para lanzar las pruebas de mutación, puedes ejecutar el siguiente comando:
+To run mutation tests, execute:
 
 ```bash
 mvn org.pitest:pitest-maven:mutationCoverage
 ```
 
-### 📂 Resultado
+### 📂 Result
 
-El informe HTML se genera en:
-````target/pit-reports/index.html````
+The HTML report is generated at:
+```
+target/pit-reports/index.html
+```
 
+From there you can consult:
 
-Desde allí puedes consultar:
+- ✅ Total percentage of detected mutations (mutation coverage).
+- 📄 A detailed list of each evaluated class and method.
+- ❌ **Surviving mutations** (changes that tests failed to detect).
 
-- ✅ El porcentaje total de mutaciones detectadas (mutation coverage).
-- 📄 Una lista detallada de cada clase y método evaluado.
-- ❌ Las mutaciones **sobrevivientes** (es decir, cambios que los tests no lograron detectar).
+> ⚠️ A high number of surviving mutations indicates that tests might be weak or cases might not be contemplated. PITEST helps you strengthen these areas.
 
-> ⚠️ Un número alto de mutaciones sobrevivientes indica que puede haber tests poco robustos o casos no contemplados. PITEST te ayuda a fortalecer esas áreas.
+This type of analysis complements Jacoco's coverage and focuses on validating the **real effectiveness** of tests, not just whether they pass or not.
 
-Este tipo de análisis complementa la cobertura de Jacoco, y se enfoca en validar la **efectividad real** de los tests, no solo si pasan o no.
+## 6. Observability with Spring Boot Actuator
 
-## 6. Observabilidad con Spring Boot Actuator
+The project includes **Spring Boot Actuator**, a fundamental tool for observability and monitoring of production applications.
 
-El proyecto incluye **Spring Boot Actuator**, una herramienta fundamental para la observabilidad y monitorización de aplicaciones en producción.
+### 🔍 What Does Actuator Provide?
 
-### 🔍 ¿Qué proporciona Actuator?
+Actuator exposes endpoints that allow access to key information about the system's state and behavior, such as:
 
-Actuator expone endpoints que permiten acceder a información clave del estado y comportamiento de la aplicación, como:
-
-- **Salud del sistema**
-- **Métricas de rendimiento**
-- **Información de configuración**
-- **Integración con herramientas de monitorización externas** (Prometheus, Grafana, etc.)
+- **System Health**
+- **Performance Metrics**
+- **Configuration Information**
+- **Integration with External Monitoring Tools** (Prometheus, Grafana, etc.)
 
 ### 📡 End
