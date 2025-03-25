@@ -3,6 +3,7 @@ package com.sportradar.worldcupscore.service;
 
 import com.sportradar.worldcupscore.model.Bet;
 import com.sportradar.worldcupscore.model.BetStatus;
+import com.sportradar.worldcupscore.util.Messages;
 import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,7 +54,7 @@ public class BetProcessor {
         if (!isShutdown) {
             betQueue.offer(bet);
         } else {
-            logger.info("The system is shutting down. New bets are not being accepted.");
+            logger.info(Messages.SHUTTING_DOWN);
         }
     }
 
@@ -78,7 +79,7 @@ public class BetProcessor {
 
         if (!isValidBet(bet, previousStatus, valid)) {
             reviewBets.add(bet);
-            logger.info("Bet {} is flagged for review due to invalid sequence: {}", bet.getId(), bet.getStatus());
+            logger.info(Messages.BET_REVIEW, bet.getId(), bet.getStatus());
             return;
         }
 
@@ -97,7 +98,8 @@ public class BetProcessor {
             totalProfitLoss.add(result);
             lossPerClient.computeIfAbsent(bet.getClient(), k -> new DoubleAdder()).add(bet.getAmount());
         }
-        logger.info("Bet with id {} has been processed successfully.", bet.getId());
+
+        logger.info(Messages.BET_PROCESSED, bet.getId());
     }
 
     private static boolean isValidBet(Bet bet, BetStatus previousStatus, boolean valid) {
@@ -125,31 +127,31 @@ public class BetProcessor {
         } catch (InterruptedException e) {
             executor.shutdownNow();
         }
-        logger.info("System shutdown completed.");
+        logger.info(Messages.SHUTDOWN_COMPLETED);
         logger.info(getSummary());
     }
 
     // Método para generar un resumen de las estadísticas procesadas
     public String getSummary() {
         StringBuilder sb = new StringBuilder();
-        sb.append("Total bets processed: ").append(totalProcessed.get()).append("\n");
-        sb.append("Total bets amount: ").append(totalAmount.sum()).append("\n");
-        sb.append("Total result (profit/loss): ").append(totalProfitLoss.sum()).append("\n");
+        sb.append(Messages.SUMMARY_HEADER_TOTAL_PROCESSED).append(totalProcessed.get()).append("\n");
+        sb.append(Messages.SUMMARY_HEADER_TOTAL_AMOUNT).append(totalAmount.sum()).append("\n");
+        sb.append(Messages.SUMMARY_HEADER_TOTAL_PROFIT_LOSS).append(totalProfitLoss.sum()).append("\n");
 
-        sb.append("Top 5 customers with the highest winnings: \n");
+        sb.append(Messages.SUMMARY_HEADER_TOP_WINNERS + "\n");
         profitPerClient.entrySet().stream()
                 .sorted((e1, e2) -> Double.compare(e2.getValue().sum(), e1.getValue().sum()))
                 .limit(5)
                 .forEach(e -> sb.append(e.getKey()).append(": ").append(e.getValue().sum()).append("\n"));
 
-        sb.append("Top 5 customers with the highest losses: \n");
+        sb.append(Messages.SUMMARY_HEADER_TOP_LOSERS + "\n");
         lossPerClient.entrySet().stream()
                 .sorted((e1, e2) -> Double.compare(e2.getValue().sum(), e1.getValue().sum()))
                 .limit(5)
                 .forEach(e -> sb.append(e.getKey()).append(": ").append(e.getValue().sum()).append("\n"));
 
         if (!reviewBets.isEmpty()) {
-            sb.append("Bets flagged for review: ").append(reviewBets.size()).append("\n");
+            sb.append(Messages.SUMMARY_HEADER_REVIEW).append(reviewBets.size()).append("\n");
         }
         return sb.toString();
     }

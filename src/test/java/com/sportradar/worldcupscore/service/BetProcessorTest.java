@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class BetProcessorTest {
 
     /**
-     * Método auxiliar para inyectar el valor de numberOfWorkers,
-     * ya que en un test unitario fuera del contexto Spring la anotación @Value no se procesa.
+     * Helper method to inject the value of numberOfWorkers,
+     * since in a unit test outside of the Spring context, the @Value annotation is not processed.
      */
     private void setNumberOfWorkers(BetProcessor processor, int workers) throws Exception {
         Field field = BetProcessor.class.getDeclaredField("numberOfWorkers");
@@ -46,7 +46,7 @@ class BetProcessorTest {
         setNumberOfWorkers(processor, 1);
         processor.initialize();
 
-        // Se crea una apuesta válida (primer update debe ser OPEN)
+        // A valid bet is created (first update must be OPEN)
         Bet bet = new Bet.BetBuilder()
                 .id(1)
                 .amount(100.0)
@@ -59,13 +59,13 @@ class BetProcessorTest {
                 .build();
 
         processor.addBet(bet);
-        // Se espera un tiempo para que el bet sea procesado
+        // Wait some time to allow the bet to be processed
         Thread.sleep(300);
 
         String summary = processor.getSummary();
         assertTrue(summary.contains("Total bets processed: 1"));
         assertTrue(summary.contains("Total bets amount: 100.0"));
-        // Una apuesta OPEN no afecta al profit/loss
+        // Wait some time to allow the bet to be processed
         assertTrue(summary.contains("Total result (profit/loss): 0.0"));
 
         List<Bet> review = processor.getReviewBets();
@@ -80,7 +80,7 @@ class BetProcessorTest {
         setNumberOfWorkers(processor, 1);
         processor.initialize();
 
-        // Se crea una apuesta inválida: el primer update debe ser OPEN, pero se envía WINNER
+        // An invalid bet is created: the first update must be OPEN, but WINNER is sent instead
         Bet bet = new Bet.BetBuilder()
                 .id(2)
                 .amount(200.0)
@@ -108,7 +108,7 @@ class BetProcessorTest {
         setNumberOfWorkers(processor, 1);
         processor.initialize();
 
-        // Primer update: apuesta válida con estado OPEN
+        // First update: valid bet with OPEN status
         Bet betOpen = new Bet.BetBuilder()
                 .id(3)
                 .amount(100.0)
@@ -122,7 +122,7 @@ class BetProcessorTest {
         processor.addBet(betOpen);
         Thread.sleep(300);
 
-        // Segundo update: apuesta con estado WINNER (se espera que sea válida, ya que el estado previo era OPEN)
+        // Second update: bet with WINNER status (expected to be valid since previous state was OPEN)
         Bet betWinner = new Bet.BetBuilder()
                 .id(3)
                 .amount(100.0)
@@ -137,11 +137,11 @@ class BetProcessorTest {
         Thread.sleep(300);
 
         String summary = processor.getSummary();
-        // Se habrán procesado 2 apuestas (el update OPEN y luego el WINNER)
+        // Two bets should have been processed (OPEN then WINNER)
         assertTrue(summary.contains("Total bets processed: 2"));
         // Total amount: 200.0 (100 + 100)
         assertTrue(summary.contains("Total bets amount: 200.0"));
-        // Para el WINNER: profit = 100*(1.5-1)=50; la apuesta OPEN no afecta al profit/loss
+        // For WINNER: profit = 100*(1.5-1)=50; the OPEN bet doesn't affect profit/loss
         assertTrue(summary.contains("Total result (profit/loss): 50.0"));
 
         processor.shutdownSystem();
@@ -153,7 +153,7 @@ class BetProcessorTest {
         setNumberOfWorkers(processor, 1);
         processor.initialize();
 
-        // Primer update: apuesta válida con estado OPEN
+        // First update: valid bet with OPEN status
         Bet betOpen = new Bet.BetBuilder()
                 .id(4)
                 .amount(150.0)
@@ -167,7 +167,7 @@ class BetProcessorTest {
         processor.addBet(betOpen);
         Thread.sleep(300);
 
-        // Segundo update: apuesta con estado LOSER (válida porque el estado previo era OPEN)
+        // Second update: bet with LOSER status (valid since the previous state was OPEN)
         Bet betLoser = new Bet.BetBuilder()
                 .id(4)
                 .amount(150.0)
@@ -182,10 +182,10 @@ class BetProcessorTest {
         Thread.sleep(300);
 
         String summary = processor.getSummary();
-        // Se habrán procesado 2 apuestas, total amount: 300.0
+        // Two bets should have been processed; total amount: 300.0
         assertTrue(summary.contains("Total bets processed: 2"));
         assertTrue(summary.contains("Total bets amount: 300.0"));
-        // Para el LOSER: resultado = -150.0 (la apuesta OPEN no genera pérdida)
+        // For LOSER: result = -150.0 (OPEN bet does not cause loss)
         assertTrue(summary.contains("Total result (profit/loss): -150.0"));
 
         processor.shutdownSystem();
@@ -197,10 +197,10 @@ class BetProcessorTest {
         setNumberOfWorkers(processor, 1);
         processor.initialize();
 
-        // Se cierra el sistema
+        // The system is shut down
         processor.shutdownSystem();
 
-        // Intentar agregar una apuesta tras el shutdown: la apuesta no debe ser aceptada.
+        // Try to add a bet after shutdown: it should not be accepted
         Bet bet = new Bet.BetBuilder()
                 .id(5)
                 .amount(200.0)
@@ -212,84 +212,85 @@ class BetProcessorTest {
                 .status(BetStatus.OPEN)
                 .build();
         processor.addBet(bet);
-        // Se espera un poco para dar chance a que, en caso de haberse aceptado, se procesara
+        // Wait a bit to give a chance for the bet to be processed in case it was accepted
         Thread.sleep(200);
 
-        // Al obtener el resumen, se debe reflejar que no se procesó la apuesta
+        // The summary should reflect that the bet was not processed
         String summary = processor.getSummary();
         assertTrue(summary.contains("Total bets processed: 0"));
     }
 
     @Test
     void testProcessBetsInterruptedExceptionHandling() throws Exception {
-        // Limpia el flag de interrupción del hilo actual
+        // Clear the current thread's interruption flag
         Thread.interrupted();
 
         BetProcessor processor = new BetProcessor();
         setNumberOfWorkers(processor, 1);
         processor.initialize();
 
-        // Reemplazamos el betQueue por una implementación que siempre arroja InterruptedException
+        // Replace betQueue with an implementation that always throws InterruptedException
         InterruptingQueue queue = new InterruptingQueue();
         Field betQueueField = BetProcessor.class.getDeclaredField("betQueue");
         betQueueField.setAccessible(true);
         betQueueField.set(processor, queue);
 
-        // Usamos reflexión para invocar el método privado processBets en el hilo actual.
+        // Use reflection to invoke the private method processBets in the current thread
         Method processBetsMethod = BetProcessor.class.getDeclaredMethod("processBets");
         processBetsMethod.setAccessible(true);
         processBetsMethod.invoke(processor);
 
-        // Tras capturar el InterruptedException, el catch invoca Thread.currentThread().interrupt().
-        // Verificamos que el flag de interrupción del hilo actual esté activo.
+        // After catching InterruptedException, the catch block calls Thread.currentThread().interrupt()
+        // Verify that the thread interruption flag is now set
         assertTrue(Thread.currentThread().isInterrupted(), "Thread should be interrupted after catching InterruptedException");
     }
 
     @Test
     void testShutdownSystemAwaitTerminationFalse() throws Exception {
-        // Preparamos la instancia del processor y configuramos el número de workers
+        // Prepare the processor instance and set number of workers
         BetProcessor processor = new BetProcessor();
         setNumberOfWorkers(processor, 1);
         processor.initialize();
 
-        // Creamos un fake executor que retorna false en awaitTermination
+        // Create a fake executor that returns false on awaitTermination
         FakeExecutorService fakeExecutor = new FakeExecutorService(false, false);
-        // Inyectamos el fake executor en el processor
+        // Inject the fake executor into the processor
         Field executorField = BetProcessor.class.getDeclaredField("executor");
         executorField.setAccessible(true);
         executorField.set(processor, fakeExecutor);
 
-        // Invocamos shutdownSystem()
+        // Call shutdownSystem()
         processor.shutdownSystem();
 
-        // Se esperaba que, al no haber terminado la terminación, se invoque shutdownNow()
+        // Since awaitTermination returned false, shutdownNow() should have been called
         assertTrue(fakeExecutor.shutdownNowCalled,
                 "shutdownNow should be called when awaitTermination returns false");
     }
 
     @Test
     void testShutdownSystemInterruptedException() throws Exception {
-        // Preparamos la instancia del processor y configuramos el número de workers
+        // Prepare the processor instance and set number of workers
         BetProcessor processor = new BetProcessor();
         setNumberOfWorkers(processor, 1);
         processor.initialize();
 
-        // Creamos un fake executor que lanza InterruptedException en awaitTermination
+        // Create a fake executor that throws InterruptedException during awaitTermination
         FakeExecutorService fakeExecutor = new FakeExecutorService(false, true);
-        // Inyectamos el fake executor en el processor
+        // Inject the fake executor into the processor
         Field executorField = BetProcessor.class.getDeclaredField("executor");
         executorField.setAccessible(true);
         executorField.set(processor, fakeExecutor);
 
-        // Invocamos shutdownSystem(); se espera que capture la InterruptedException
+        // Call shutdownSystem(); it should catch the InterruptedException
         processor.shutdownSystem();
 
-        // En ambos casos (awaitTermination false o exception) se debe invocar shutdownNow()
+        // Inner class to force InterruptedException during poll(...)
         assertTrue(fakeExecutor.shutdownNowCalled,
                 "shutdownNow should be called when awaitTermination throws InterruptedException");
     }
 
-    // Clase interna para forzar el lanzamiento de InterruptedException en poll(...)
+
+    // Inner class to force InterruptedException during poll(...)
     private static class InterruptingQueue extends LinkedBlockingQueue<Bet> {
         @Override
         public Bet poll(long timeout, TimeUnit unit) throws InterruptedException {
@@ -304,8 +305,8 @@ class BetProcessorTest {
         boolean shutdownCalled = false;
 
         /**
-         * @param awaitTerminationShouldReturn valor que retornará awaitTermination si no se lanza excepción.
-         * @param throwInterruptedExceptionOnAwait si es true, awaitTermination lanzará InterruptedException.
+         * @param awaitTerminationShouldReturn the value that awaitTermination should return if no exception is thrown
+         * @param throwInterruptedExceptionOnAwait if true, awaitTermination will throw InterruptedException
          */
         public FakeExecutorService(boolean awaitTerminationShouldReturn, boolean throwInterruptedExceptionOnAwait) {
             this.awaitTerminationShouldReturn = awaitTerminationShouldReturn;
@@ -340,8 +341,6 @@ class BetProcessorTest {
             }
             return awaitTerminationShouldReturn;
         }
-
-        // Los métodos restantes no son necesarios para estos tests y pueden lanzar UnsupportedOperationException
 
         @Override
         public <T> java.util.concurrent.Future<T> submit(java.util.concurrent.Callable<T> task) {

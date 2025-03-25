@@ -99,21 +99,11 @@
 						<version>0.15</version>
 					</dependency>
 				</dependencies>
-				<executions>
-					<execution>
-						<id>pitest</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>mutationCoverage</goal>
-						</goals>
-					</execution>
-				</executions>
 				<configuration>
 					<targetClasses>
 						<param>com.sportradar.worldcupscore.*</param>
 					</targetClasses>
 					<excludedTestClasses>
-						<!-- Ejemplo: se excluye la clase de test 'IntegrationTest' -->
 						<param>com.sportradar.worldcupscore.integration.BetControllerIntegrationTest</param>
 					</excludedTestClasses>
 					<verbose>true</verbose>
