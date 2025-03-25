@@ -1,5 +1,6 @@
 package com.sportradar.worldcupscore.exception;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -8,6 +9,7 @@ import org.springframework.web.context.request.WebRequest;
 
 import java.util.Date;
 
+@Hidden
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
