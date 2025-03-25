@@ -36,8 +36,15 @@ This project is a REST microservice developed in Java with Spring Boot that simu
 ### Configuration
 The project includes a configuration class responsible for preparing the system when starting and ending application execution:
 
+- **Startup Command:**  
+  To start the microservice, use the following Maven command:
+  ```bash
+  mvn spring-boot:run
+  ```
+
 - **Initialization with `@PostConstruct`:**  
   Upon application startup, **100 bets in `OPEN` state** are automatically generated and injected into the system. This allows having a simulated initial database and validates that bet processing works correctly from the beginning.
+
 
 - **Shutdown with `@PreDestroy`:**  
   Before the application stops, the `shutdownSystem()` method of `BetProcessor` is automatically invoked. This mechanism ensures an **orderly shutdown**, waiting for threads (workers) to finish processing all pending bets before closing the application.
@@ -46,7 +53,7 @@ The project includes a configuration class responsible for preparing the system 
   In the `application.properties` file, the following parameter is defined:
 
   ```properties
-  bet.processor.workers=5
+  bet.processor.workers
   ```
 
 ---
