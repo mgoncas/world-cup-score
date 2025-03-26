@@ -42,8 +42,8 @@ class WorldCupScoreConfigTest {
             assertEquals(expectedId, bet.getId());
             assertEquals(100.0, bet.getAmount());
             assertEquals(1.5, bet.getOdds());
-            assertEquals("Cliente" + expectedId, bet.getClient());
-            assertEquals("Evento", bet.getEvent());
+            assertEquals("Client" + expectedId, bet.getClient());
+            assertEquals("Event", bet.getEvent());
             assertEquals("Market1", bet.getMarket());
             assertEquals("Selection1", bet.getSelection());
             assertEquals(BetStatus.OPEN, bet.getStatus());
