@@ -43,7 +43,7 @@ The project includes a configuration class responsible for preparing the system 
   ```
 
 - **Initialization with `@PostConstruct`:**  
-  Upon application startup, **100 bets in `OPEN` state** are automatically generated and injected into the system. This allows having a simulated initial database and validates that bet processing works correctly from the beginning.
+  Upon application startup, **100 bets in `OPEN` state** are automatically generated and injected into the system. This allows having a simulated initial queue and validates that bet processing works correctly from the beginning.
 
 
 - **Shutdown with `@PreDestroy`:**  
