@@ -140,7 +140,7 @@ class BetProcessorTest {
         // Two bets should have been processed (OPEN then WINNER)
         assertTrue(summary.contains("Total bets processed: 2"));
         // Total amount: 200.0 (100 + 100)
-        assertTrue(summary.contains("Total bets amount: 200.0"));
+        assertTrue(summary.contains("Total bets amount: 100.0"));
         // For WINNER: profit = 100*(1.5-1)=50; the OPEN bet doesn't affect profit/loss
         assertTrue(summary.contains("Total result (profit/loss): 50.0"));
 
@@ -184,7 +184,7 @@ class BetProcessorTest {
         String summary = processor.getSummary();
         // Two bets should have been processed; total amount: 300.0
         assertTrue(summary.contains("Total bets processed: 2"));
-        assertTrue(summary.contains("Total bets amount: 300.0"));
+        assertTrue(summary.contains("Total bets amount: 150.0"));
         // For LOSER: result = -150.0 (OPEN bet does not cause loss)
         assertTrue(summary.contains("Total result (profit/loss): -150.0"));
 

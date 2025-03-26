@@ -20,7 +20,6 @@ class WorldCupScoreConfigTest {
 
     @BeforeEach
     void setUp() {
-        // Creamos un mock del BetProcessor
         betProcessor = mock(BetProcessor.class);
         config = new WorldCupScoreConfig(betProcessor);
     }
@@ -53,10 +52,8 @@ class WorldCupScoreConfigTest {
 
     @Test
     void testOnShutdown() {
-        // Ejecutamos el método onShutdown
         config.onShutdown();
 
-        // Verificamos que se llame al método shutdownSystem del BetProcessor
         verify(betProcessor, times(1)).shutdownSystem();
     }
 }

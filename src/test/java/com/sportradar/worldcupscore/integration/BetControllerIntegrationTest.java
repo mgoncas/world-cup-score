@@ -28,7 +28,6 @@ public class BetControllerIntegrationTest {
 
     @Test
     public void testAddBetOpen() throws Exception {
-        // Construimos una apuesta con estado OPEN
         Bet bet = new Bet.BetBuilder()
                 .id(105)
                 .amount(100.0)
@@ -92,7 +91,7 @@ public class BetControllerIntegrationTest {
         Thread.sleep(500);
 
         Bet loserBet = new Bet.BetBuilder()
-                .id(1) // misma apuesta, misma id
+                .id(1)// misma apuesta, misma id
                 .amount(100.0)
                 .odds(1.5)
                 .client("Cliente1")

@@ -95,7 +95,6 @@ class BetControllerTest {
     void testShutdownSystem() {
         doNothing().when(betProcessor).shutdownSystem();
 
-        // Act: se invoca el método shutdownSystem del controlador
         ResponseEntity<String> response = betController.shutdownSystem();
 
         verify(betProcessor, times(1)).shutdownSystem();

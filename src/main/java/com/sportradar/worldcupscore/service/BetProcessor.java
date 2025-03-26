@@ -86,7 +86,11 @@ public class BetProcessor {
         betStatusMap.put(bet.getId(), bet.getStatus());
 
         totalProcessed.incrementAndGet();
-        totalAmount.add(bet.getAmount());
+
+        if (bet.getStatus() == BetStatus.OPEN) {
+            // only when open
+            totalAmount.add(bet.getAmount());
+        }
 
         double result;
         if (bet.getStatus() == BetStatus.WINNER) {
