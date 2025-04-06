@@ -75,9 +75,8 @@ public class BetProcessor {
 
     private void processBet(Bet bet) {
         BetStatus previousStatus = betStatusMap.get(bet.getId());
-        boolean valid = false;
 
-        if (!isValidBet(bet, previousStatus, valid)) {
+        if (!isValidBet(bet, previousStatus)) {
             reviewBets.add(bet);
             logger.info(Messages.BET_REVIEW, bet.getId(), bet.getStatus());
             return;
@@ -106,19 +105,17 @@ public class BetProcessor {
         logger.info(Messages.BET_PROCESSED, bet.getId());
     }
 
-    private static boolean isValidBet(Bet bet, BetStatus previousStatus, boolean valid) {
+    // FIXME: validar tambien si la apuesta no ha cambiado para dar coherencia??
+    private boolean isValidBet(Bet bet, BetStatus previousStatus) {
         if (previousStatus == null) {
-            // first update: must OPEN
-            if (bet.getStatus() == BetStatus.OPEN) {
-                valid = true;
-            }
-        } else if (previousStatus == BetStatus.OPEN) {
-            // only final status
-            if (bet.getStatus() == BetStatus.WINNER || bet.getStatus() == BetStatus.LOSER || bet.getStatus() == BetStatus.VOID) {
-                valid = true;
-            }
+            return bet.getStatus() == BetStatus.OPEN;
         }
-        return valid;
+        if (previousStatus == BetStatus.OPEN) {
+            return bet.getStatus() == BetStatus.WINNER ||
+                    bet.getStatus() == BetStatus.LOSER ||
+                    bet.getStatus() == BetStatus.VOID;
+        }
+        return false;
     }
 
     public void shutdownSystem() {
